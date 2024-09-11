@@ -1,0 +1,93 @@
+group 'com.example.flutter_background_geofence'
+version '1.0-SNAPSHOT'
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+// Use it to define the path for Flutter jar for flutter code referencing to work
+def flutterJar = localProperties.getProperty('flutter.jar')
+
+buildscript {
+    ext.kotlin_version = '1.8.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    if (project.android.hasProperty("namespace")) {
+        namespace 'dev.flutter.background_geofence'
+    }
+
+    compileSdk 34
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+    }
+
+    defaultConfig {
+        minSdkVersion 21
+    }
+
+    dependencies {
+        testImplementation 'org.jetbrains.kotlin:kotlin-test'
+        testImplementation 'org.mockito:mockito-core:5.0.0'
+        implementation 'androidx.activity:activity-ktx:1.9.2'
+        def core_version = "1.13.1"
+        // Java language implementation
+        //noinspection KtxExtensionAvailable
+        implementation "androidx.core:core:$core_version"
+        // Kotlin
+        implementation "androidx.core:core-ktx:$core_version"
+        if (flutterJar != null) {
+            compileOnly(files(flutterJar))
+        }
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation 'androidx.work:work-runtime-ktx:2.9.1'
+}
